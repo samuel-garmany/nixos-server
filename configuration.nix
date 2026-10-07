@@ -84,10 +84,32 @@ in
       starship init fish | source
       zoxide init --cmd cd fish | source
       fzf --fish | source
+
+      # cd to wherever yazi was when it quit.
+      # https://yazi-rs.github.io/docs/quick-start
+      function y
+      	set tmp (mktemp -t "yazi-cwd.XXXXXX")
+      	command yazi $argv --cwd-file="$tmp"
+      	if read -z cwd < "$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
+      		builtin cd -- "$cwd"
+      	end
+      	command rm -f -- "$tmp"
+      end
     '';
   };
 
-  programs.git.enable = true;
+  programs.git = {
+    enable = true;
+    config = {
+      user.name = "Samuel Garmany";
+      user.email = "65299214+samuel-garmany@users.noreply.github.com";
+      init.defaultBranch = "main";
+    };
+  };
+
+  # Lets the prebuilt language servers Mason downloads run.
+  programs.nix-ld.enable = true;
+  programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc zlib ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -106,17 +128,29 @@ in
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    cryptsetup
+
+    # terminal
     bat
     btop
-    cryptsetup
     eza
     fd
     fzf
+    gh
     jq
+    lazygit
     ripgrep
     starship
+    stow
+    tldr
     unzip
+    yazi
     zoxide
+
+    # neovim, configured from my dotfiles (LazyVim)
+    neovim
+    gcc
+    tree-sitter
   ];
 
   # List services that you want to enable:
