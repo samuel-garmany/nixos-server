@@ -64,4 +64,3 @@ Pika Backup does the scheduling and pruning on each device. Nothing checks
 the repositories automatically, so run an integrity check from Pika now and
 then. The encryption key is in the repository (`repokey`); the passphrase is
 the only way back in.
-# nixos-server
