@@ -107,6 +107,14 @@ in
     };
   };
 
+  # LazyVim. The config is its own repo, cloned to ~/.config/nvim.
+  programs.neovim = {
+    enable = true;
+    defaultEditor = true;
+    viAlias = true;
+    vimAlias = true;
+  };
+
   # Lets the prebuilt language servers Mason downloads run.
   programs.nix-ld.enable = true;
   programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc zlib ];
@@ -141,14 +149,12 @@ in
     lazygit
     ripgrep
     starship
-    stow
     tldr
     unzip
     yazi
     zoxide
 
-    # neovim, configured from my dotfiles (LazyVim)
-    neovim
+    # for nvim-treesitter
     gcc
     tree-sitter
   ];
