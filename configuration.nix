@@ -11,7 +11,7 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHpe5YfySlIVBJjc2vm/sQ29JYLi3nD/kdOY+9NyNMZu user@desktop"
   ];
 
-  hostName = "server.tail5c3838.ts.net";
+  tailnetName = "server.tail5c3838.ts.net";
   vaultDomain = "vault.garmany.me";
   calibreDomain = "calibre.garmany.me";
 
@@ -37,7 +37,7 @@ in
   boot.loader.generic-extlinux-compatible.enable = true;
   boot.kernelParams = [ "console=ttyS0,115200n8" "console=ttyAMA0,115200n8" "console=tty0" ];
 
-  networking.hostName = "server"; # Define your hostname.
+  networking.hostName = "server";
 
   services.tailscale.enable = true;
 
@@ -52,6 +52,7 @@ in
     {
       device = "/mnt/data/swapfile";
       size = 4 * 1024;
+      options = [ "nofail" ];
     }
   ];
 
@@ -60,7 +61,6 @@ in
 
   security.apparmor.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.user = {
     isNormalUser = true;
     description = "Samuel Garmany";
@@ -81,21 +81,25 @@ in
     interactiveShellInit = ''
       set -g fish_greeting
 
-      starship init fish | source
-      zoxide init --cmd cd fish | source
       fzf --fish | source
 
       # cd to wherever yazi was when it quit.
       # https://yazi-rs.github.io/docs/quick-start
       function y
-      	set tmp (mktemp -t "yazi-cwd.XXXXXX")
-      	command yazi $argv --cwd-file="$tmp"
-      	if read -z cwd < "$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
-      		builtin cd -- "$cwd"
-      	end
-      	command rm -f -- "$tmp"
+        set tmp (mktemp -t "yazi-cwd.XXXXXX")
+        command yazi $argv --cwd-file="$tmp"
+        if read -z cwd < "$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
+          builtin cd -- "$cwd"
+        end
+        command rm -f -- "$tmp"
       end
     '';
+  };
+
+  programs.starship.enable = true;
+  programs.zoxide = {
+    enable = true;
+    flags = [ "--cmd cd" ];
   };
 
   programs.git = {
@@ -117,10 +121,6 @@ in
 
   # Lets the prebuilt language servers Mason downloads run.
   programs.nix-ld.enable = true;
-  programs.nix-ld.libraries = with pkgs; [ stdenv.cc.cc zlib ];
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   nix.settings.auto-optimise-store = true;
   nix.gc = {
@@ -129,9 +129,13 @@ in
     options = "--delete-older-than 14d";
   };
 
-  # Weekly `nixos-rebuild switch --upgrade`.
-  system.autoUpgrade.enable = true;
-  system.autoUpgrade.dates = "weekly";
+  # Weekly `nixos-rebuild switch --upgrade`, rebooting into a new kernel if
+  # it finishes inside the window.
+  system.autoUpgrade = {
+    enable = true;
+    dates = "2:00";
+    allowReboot = true;
+  };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
@@ -158,8 +162,6 @@ in
     gcc
     tree-sitter
   ];
-
-  # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
   services.openssh = {
@@ -259,7 +261,7 @@ in
     adminCredentialsFile = "${secrets}/miniflux-admin-credentials";
     config = {
       LISTEN_ADDR = "127.0.0.1:${toString ports.miniflux}";
-      BASE_URL = "https://${hostName}:8446/";
+      BASE_URL = "https://${tailnetName}:8446/";
       POLLING_SCHEDULER = "entry_frequency";
       CLEANUP_ARCHIVE_READ_DAYS = -1; # keep read entries
       FETCH_YOUTUBE_WATCH_TIME = 1;
@@ -269,8 +271,8 @@ in
   # Nextcloud
   services.nextcloud = {
     enable = true;
-    package = pkgs.nextcloud34;
-    inherit hostName;
+    package = pkgs.nextcloud35;
+    hostName = tailnetName;
     datadir = "/mnt/data/nextcloud";
     https = true;
     configureRedis = true;
@@ -281,7 +283,7 @@ in
     secretFile = "${secrets}/nextcloud-secrets";
     settings = {
       overwriteprotocol = "https";
-      "overwrite.cli.url" = "https://${hostName}/";
+      "overwrite.cli.url" = "https://${tailnetName}/";
       trusted_proxies = [ "127.0.0.1" "::1" ];
       maintenance_window_start = 8; # UTC
       # The module default, plus HEIC for iPhone stills.
@@ -300,12 +302,12 @@ in
       ];
     };
     extraApps = {
-      inherit (pkgs.nextcloud34Packages.apps) calendar contacts tasks deck;
+      inherit (pkgs.nextcloud35Packages.apps) calendar contacts tasks deck;
     };
     notify_push.enable = true;
   };
 
-  services.nginx.virtualHosts.${hostName}.listen = [
+  services.nginx.virtualHosts.${tailnetName}.listen = [
     {
       addr = "127.0.0.1";
       port = ports.nextcloud;
@@ -313,7 +315,9 @@ in
   ];
 
   # tailscale serve replaces x-forwarded-for, so notify_push cannot prove it
-  # is a trusted proxy over the public hostname.
+  # is a trusted proxy over the public hostname. Only the daemon's own URL is
+  # overridden: notify_push.nextcloudUrl would also change the push endpoint
+  # handed to clients.
   systemd.services.nextcloud-notify_push.environment.NEXTCLOUD_URL =
     lib.mkForce "http://127.0.0.1:${toString ports.nextcloud}";
 
@@ -347,7 +351,10 @@ in
   systemd.services.phpfpm-nextcloud.unitConfig.RequiresMountsFor = "/mnt/data/nextcloud";
   systemd.services.postgresqlBackup.unitConfig.RequiresMountsFor = "/mnt/data/backups/postgresql";
   systemd.services.vaultwarden.unitConfig.RequiresMountsFor = "/var/lib/vaultwarden";
-  systemd.services.backup-vaultwarden.unitConfig.RequiresMountsFor = "/mnt/data/backups/vaultwarden";
+  systemd.services.backup-vaultwarden.unitConfig.RequiresMountsFor = [
+    "/mnt/data/backups/vaultwarden"
+    "/var/lib/vaultwarden"
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
