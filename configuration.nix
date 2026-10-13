@@ -5,7 +5,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  # SSH keys allowed in as root, as user and to Borg.
+  # SSH keys allowed in as user and to Borg.
   authorizedKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJ8Oq+mVW8+eKyLtpefLdnkAMRrmVeVDfotlYfdGhs74 user@secureblue"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHpe5YfySlIVBJjc2vm/sQ29JYLi3nD/kdOY+9NyNMZu user@desktop"
@@ -67,7 +67,6 @@ in
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = authorizedKeys;
   };
-  users.users.root.openssh.authorizedKeys.keys = authorizedKeys;
 
   programs.git = {
     enable = true;
@@ -112,6 +111,7 @@ in
   # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
+    settings.PermitRootLogin = "no";
     settings.PasswordAuthentication = false;
     settings.KbdInteractiveAuthentication = false;
   };
