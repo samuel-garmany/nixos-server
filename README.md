@@ -4,7 +4,8 @@
 
     sudo nixos-rebuild switch
 
-Upgrades itself weekly from the nixos-26.05 channel.
+Upgrades itself weekly from the nixos-26.05 channel, rebooting when the
+kernel changes.
 
 ## Secrets
 

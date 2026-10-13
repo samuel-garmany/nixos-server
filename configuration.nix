@@ -65,42 +65,9 @@ in
     isNormalUser = true;
     description = "Samuel Garmany";
     extraGroups = [ "wheel" ];
-    shell = pkgs.fish;
     openssh.authorizedKeys.keys = authorizedKeys;
   };
   users.users.root.openssh.authorizedKeys.keys = authorizedKeys;
-
-  programs.fish = {
-    enable = true;
-    shellAliases = {
-      cat = "bat";
-      ls = "eza";
-      ll = "eza -l";
-      la = "eza -la";
-    };
-    interactiveShellInit = ''
-      set -g fish_greeting
-
-      fzf --fish | source
-
-      # cd to wherever yazi was when it quit.
-      # https://yazi-rs.github.io/docs/quick-start
-      function y
-        set tmp (mktemp -t "yazi-cwd.XXXXXX")
-        command yazi $argv --cwd-file="$tmp"
-        if read -z cwd < "$tmp"; and [ "$cwd" != "$PWD" ]; and test -d "$cwd"
-          builtin cd -- "$cwd"
-        end
-        command rm -f -- "$tmp"
-      end
-    '';
-  };
-
-  programs.starship.enable = true;
-  programs.zoxide = {
-    enable = true;
-    flags = [ "--cmd cd" ];
-  };
 
   programs.git = {
     enable = true;
@@ -111,16 +78,12 @@ in
     };
   };
 
-  # LazyVim. The config is its own repo, cloned to ~/.config/nvim.
   programs.neovim = {
     enable = true;
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
   };
-
-  # Lets the prebuilt language servers Mason downloads run.
-  programs.nix-ld.enable = true;
 
   nix.settings.auto-optimise-store = true;
   nix.gc = {
@@ -129,38 +92,21 @@ in
     options = "--delete-older-than 14d";
   };
 
-  # Weekly `nixos-rebuild switch --upgrade`, rebooting into a new kernel if
-  # it finishes inside the window.
+  # Weekly `nixos-rebuild switch --upgrade`, rebooting into a new kernel
+  # when there is one.
   system.autoUpgrade = {
     enable = true;
-    dates = "2:00";
+    dates = "Sat 02:00";
     allowReboot = true;
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
-    cryptsetup
-
-    # terminal
-    bat
     btop
-    eza
-    fd
-    fzf
-    gh
+    cryptsetup
     jq
-    lazygit
     ripgrep
-    starship
-    tldr
-    unzip
-    yazi
-    zoxide
-
-    # for nvim-treesitter
-    gcc
-    tree-sitter
   ];
 
   # Enable the OpenSSH daemon.
