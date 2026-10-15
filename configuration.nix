@@ -133,7 +133,7 @@ in
         "https://adguardteam.github.io/HostlistsRegistry/assets/filter_59.txt" # AdGuard DNS Popup Hosts filter
         "https://adguardteam.github.io/HostlistsRegistry/assets/filter_48.txt" # HaGeZi's Pro Blocklist
         "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt" # HaGeZi's Threat Intelligence Feeds
-      ]
+      ];
     };
   };
 
