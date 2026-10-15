@@ -128,6 +128,12 @@ in
         edns_client_subnet.enabled = false;
       };
       querylog.interval = "24h";
+      filters = map(url: { enabled = true; url = url}) [
+        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt"  # AdGuard DNS filter
+        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_59.txt" # AdGuard DNS Popup Hosts filter
+        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_48.txt" # HaGeZi's Pro Blocklist
+        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt" # HaGeZi's Threat Intelligence Feeds
+      ]
     };
   };
 
