@@ -1,39 +1,42 @@
 # nixos-server
 
-/etc/nixos for my Raspberry Pi 4B.
+This repo holds the /etc/nixos for my Raspberry Pi 4B server. When built, it provides my cloud services including the following:
+
+- **[Nextcloud](https://nextcloud.com/):** Storage, calendar, and contacts.
+    - It also integrates well with [Joplin](https://joplinapp.org/) and [Zotero](https://www.zotero.org/), so it stores my notes and academic paper annotations.
+- **[Vaultwarden](https://vaultwarden.com/):** Password manager written in Rust and compatible with Bitwarden clients.
+- **[Calibre-Web](https://github.com/janeczku/calibre-web):** Hosts my ebook library with inbuilt support for my Kobo ereader. Uses the Calibre file structure.
+- **[Miniflux](https://miniflux.app/):** A simple RSS feed for following blogs and news.
+- **[Adguard Home](https://adguard.com/en/adguard-home/overview.html):** Provides DNS-level ad blocking across my tailnet.
+
+## Configuration Changes and Upgrades
 
     sudo nixos-rebuild switch
 
-Upgrades itself weekly from the nixos-26.05 channel, rebooting when the
-kernel changes.
+Automatically upgrades itself weekly, with reboots for kernel updates. Manual upgrades can be performed using:
 
-## Secrets
+    sudo nixos-rebuild switch --upgrade
 
-Not in git. Root-only files in /var/lib/secrets, copies in Bitwarden.
+## Future Directions
 
-    cloudflared-token
-    miniflux-admin-credentials   ADMIN_USERNAME= and ADMIN_PASSWORD=
-    nextcloud-adminpass
-    nextcloud-secrets            json, secret and passwordsalt
+I'm interested in eventually replacing Tailscale with plain Wireguard, adding forgejo, and moving my personal site to this server in order to move away from GitHub and GitHub pages, respectively. I would also like a dedicated photo storage service, though this would require a hardware upgrade (I have tried on the pi, it is not good).
+
+## Notes
+
+> [!IMPORTANT]
+> Below is a list of config that isn't declared in Nix:
 
 ## tailscale serve
 
-Not in the config either.
-
     tailscale serve --bg --https=443  8080   # nextcloud
-    tailscale serve --bg --https=8443 3000   # adguard
+    tailscale serve --bg --https=8443 3000   # adguard home
     tailscale serve --bg --https=8444 8081   # vaultwarden
     tailscale serve --bg --https=8445 8083   # calibre-web
     tailscale serve --bg --https=8446 8082   # miniflux
-
-## Kobo
-
-Set up sync from calibre.garmany.me, not localhost. It builds the sync URL
-from whatever address you opened it on.
 
 ## Borg
 
     ssh://borg@server.tail5c3838.ts.net/./<device>
 
-One repo per device. New devices need their ssh key added at the top of
-configuration.nix. Pika Backup handles the schedule.
+One repo per device. New devices need their ssh key included at the top of
+configuration.nix.
