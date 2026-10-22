@@ -92,16 +92,23 @@ in
     allowReboot = true;
   };
 
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    btop
-    cryptsetup
-    jq
-    nano
-    ripgrep
-  ];
+  environment = {
+    # List packages installed in system profile. To search, run:
+    # $ nix search wget
+    systemPackages = with pkgs; [
+      btop
+      cryptsetup
+      helix
+    ];
 
+    variables.EDITOR = "hx";
+
+    shellAliases = {
+      vi = "hx";
+      vim = "hx";
+    };
+  };
+  
   # Enable the OpenSSH daemon.
   services.openssh = {
     enable = true;
