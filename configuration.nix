@@ -117,6 +117,9 @@ in
   };
 
   # AdGuard Home
+  # Lists sourced from:
+  # https://adguardteam.github.io/HostlistsRegistry/assets/filters.json
+  # https://github.com/hagezi/dns-blocklist
   services.adguardhome = {
     enable = true;
     host = "127.0.0.1";
@@ -133,6 +136,7 @@ in
         "https://adguardteam.github.io/HostlistsRegistry/assets/filter_59.txt" # AdGuard DNS Popup Hosts filter
         "https://adguardteam.github.io/HostlistsRegistry/assets/filter_48.txt" # HaGeZi's Pro Blocklist
         "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt" # HaGeZi's Threat Intelligence Feeds
+        "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/social.txt" # HaGeZi's Social Networks
       ];
     };
   };
