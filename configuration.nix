@@ -77,13 +77,6 @@ in
     };
   };
 
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-  };
-
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;
@@ -105,6 +98,7 @@ in
     btop
     cryptsetup
     jq
+    nano
     ripgrep
   ];
 
