@@ -259,7 +259,7 @@ in
       ];
     };
     extraApps = {
-      inherit (pkgs.nextcloud35Packages.apps) calendar contacts tasks deck;
+      inherit (pkgs.nextcloud35Packages.apps) calendar contacts tasks bookmarks;
     };
     notify_push.enable = true;
   };
