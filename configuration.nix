@@ -120,6 +120,9 @@ in
   };
 
   # AdGuard Home
+  # Lists sourced from:
+  # https://adguardteam.github.io/HostlistsRegistry/assets/filters.json
+  # https://github.com/hagezi/dns-blocklist
   services.adguardhome = {
     enable = true;
     host = "127.0.0.1";
@@ -274,7 +277,7 @@ in
         calendar
         contacts
         tasks
-        deck
+        bookmarks
         ;
     };
     notify_push.enable = true;
