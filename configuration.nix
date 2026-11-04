@@ -2,7 +2,12 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   # SSH keys allowed in as user and to Borg.
@@ -35,7 +40,11 @@ in
   # Bootloader.
   boot.loader.grub.enable = false;
   boot.loader.generic-extlinux-compatible.enable = true;
-  boot.kernelParams = [ "console=ttyS0,115200n8" "console=ttyAMA0,115200n8" "console=tty0" ];
+  boot.kernelParams = [
+    "console=ttyS0,115200n8"
+    "console=ttyAMA0,115200n8"
+    "console=tty0"
+  ];
 
   networking.hostName = "server";
 
@@ -77,13 +86,6 @@ in
     };
   };
 
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-  };
-
   nix.settings.auto-optimise-store = true;
   nix.gc = {
     automatic = true;
@@ -105,6 +107,7 @@ in
     btop
     cryptsetup
     jq
+    nano
     ripgrep
   ];
 
@@ -123,17 +126,27 @@ in
     settings = {
       dns = {
         upstream_dns = [ "https://dns.quad9.net/dns-query" ];
-        bootstrap_dns = [ "9.9.9.9" "149.112.112.112" "2620:fe::fe" ];
+        bootstrap_dns = [
+          "9.9.9.9"
+          "149.112.112.112"
+          "2620:fe::fe"
+        ];
         enable_dnssec = true;
         edns_client_subnet.enabled = false;
       };
       querylog.interval = "24h";
-      filters = map(url: { enabled = true; url = url; }) [
-        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt"  # AdGuard DNS filter
-        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_59.txt" # AdGuard DNS Popup Hosts filter
-        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_48.txt" # HaGeZi's Pro Blocklist
-        "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt" # HaGeZi's Threat Intelligence Feeds
-      ];
+      filters =
+        map
+          (url: {
+            enabled = true;
+            url = url;
+          })
+          [
+            "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt" # AdGuard DNS filter
+            "https://adguardteam.github.io/HostlistsRegistry/assets/filter_59.txt" # AdGuard DNS Popup Hosts filter
+            "https://adguardteam.github.io/HostlistsRegistry/assets/filter_48.txt" # HaGeZi's Pro Blocklist
+            "https://adguardteam.github.io/HostlistsRegistry/assets/filter_44.txt" # HaGeZi's Threat Intelligence Feeds
+          ];
     };
   };
 
@@ -236,7 +249,10 @@ in
     settings = {
       overwriteprotocol = "https";
       "overwrite.cli.url" = "https://${tailnetName}/";
-      trusted_proxies = [ "127.0.0.1" "::1" ];
+      trusted_proxies = [
+        "127.0.0.1"
+        "::1"
+      ];
       maintenance_window_start = 8; # UTC
       # The module default, plus HEIC for iPhone stills.
       enabledPreviewProviders = [
@@ -254,7 +270,12 @@ in
       ];
     };
     extraApps = {
-      inherit (pkgs.nextcloud35Packages.apps) calendar contacts tasks deck;
+      inherit (pkgs.nextcloud35Packages.apps)
+        calendar
+        contacts
+        tasks
+        deck
+        ;
     };
     notify_push.enable = true;
   };
